@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendario de Adviento 💝</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Efecto de nieve */
+        .snowflake {
+            position: fixed;
+            top: -10px;
+            z-index: 9999;
+            color: white;
+            font-size: 1em;
+            animation: fall linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(100vh);
+            }
+        }
+
+        /* Landing Page - Antes de la fecha */
+        .landing-page {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+            padding: 20px;
+            color: white;
+        }
+
+        .landing-page h1 {
+            font-size: 3.5em;
+            margin-bottom: 20px;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .landing-page .gift-icon {
+            font-size: 8em;
+            margin: 30px 0;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        .landing-page p {
+            font-size: 1.5em;
+            max-width: 600px;
+            line-height: 1.6;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .countdown {
+            margin-top: 40px;
+            font-size: 2em;
+            font-weight: bold;
+            background: rgba(255,255,255,0.2);
+            padding: 20px 40px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        /* Calendario de Adviento */
+        .calendar-container {
+            display: none;
+            padding: 40px 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .calendar-header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .calendar-header h1 {
+            font-size: 3em;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+            margin-bottom: 10px;
+        }
+
+        .calendar-header p {
+            font-size: 1.3em;
+            opacity: 0.9;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .calendar-day {
+            background: linear-gradient(145deg, #ffffff, #f0f0f0);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            border: 3px solid #d4af37;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .calendar-day::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+            transform: rotate(45deg);
+            transition: all 0.5s;
+        }
+
+        .calendar-day:hover::before {
+            left: 100%;
+        }
+
+        .calendar-day:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+        }
+
+        .day-number {
+            font-size: 3em;
+            font-weight: bold;
+            color: #c41e3a;
+            margin-bottom: 10px;
+        }
+
+        .day-label {
+            font-size: 1em;
+            color: #2d5016;
+            font-weight: 600;
+        }
+
+        .calendar-day.locked {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background: linear-gradient(145deg, #cccccc, #999999);
+        }
+
+        .calendar-day.locked:hover {
+            transform: none;
+        }
+
+        .calendar-day.opened {
+            background: linear-gradient(145deg, #d4af37, #f4d03f);
+            border-color: #2d5016;
+        }
+
+        .lock-icon {
+            font-size: 2em;
+            display: block;
+            margin-top: 10px;
+        }
+
+        /* Modal del Cupón */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 0;
+            max-width: 800px;
+            width: 100%;
+            position: relative;
+            animation: modalSlide 0.5s ease;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.5);
+        }
+
+        @keyframes modalSlide {
+            from {
+                transform: translateY(-100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 2em;
+            cursor: pointer;
+            color: white;
+            z-index: 10001;
+            background: rgba(0,0,0,0.3);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .close-btn:hover {
+            background: rgba(0,0,0,0.6);
+            transform: rotate(90deg);
+        }
+
+        .coupon {
+            border: 8px solid;
+            border-image: linear-gradient(45deg, #2d5016, #d4af37, #c41e3a, #2d5016) 1;
+            border-radius: 20px;
+            padding: 40px;
+            background: linear-gradient(to bottom, #ffffff 0%, #f8f8f8 100%);
+            position: relative;
+        }
+
+        .coupon-header {
+            background: linear-gradient(135deg, #c41e3a 0%, #e63946 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: -40px -40px 30px -40px;
+            text-align: center;
+            position: relative;
+        }
+
+        .holly-decoration {
+            position: absolute;
+            font-size: 3em;
+        }
+
+        .holly-left {
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .holly-right {
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .coupon-header h2 {
+            font-size: 2.5em;
+            margin: 0;
+        }
+
+        .coupon-body {
+            text-align: center;
+            padding: 30px 20px;
+        }
+
+        .coupon-title {
+            font-size: 3em;
+            color: #2d5016;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .coupon-description {
+            font-size: 1.5em;
+            color: #555;
+            line-height: 1.8;
+            margin-bottom: 30px;
+        }
+
+        .coupon-footer {
+            border-top: 3px dashed #d4af37;
+            padding-top: 20px;
+            display: flex;
+            justify-content: space-around;
+            margin-top: 30px;
+        }
+
+        .coupon-dot {
+            width: 12px;
+            height: 12px;
+            background: #d4af37;
+            border-radius: 50%;
+        }
+
+        @media (max-width: 768px) {
+            .calendar-header h1 {
+                font-size: 2em;
+            }
+            .calendar-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 15px;
+            }
+            .landing-page h1 {
+                font-size: 2em;
+            }
+            .coupon-title {
+                font-size: 2em;
+            }
+            .coupon-description {
+                font-size: 1.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Landing Page -->
+    <div class="landing-page" id="landingPage">
+        <h1>✨ Se Acerca Algo Especial ✨</h1>
+        <div class="gift-icon">🎁</div>
+        <p>
+            Una sorpresa llena de amor está esperando por ti...<br>
+            Cada día de diciembre será mágico<br>
+            ¡Prepárate para una experiencia única!
+        </p>
+        <div class="countdown" id="countdown">
+            Cargando...
+        </div>
+    </div>
+
+    <!-- Calendario de Adviento -->
+    <div class="calendar-container" id="calendarContainer">
+        <div class="calendar-header">
+            <h1>🎄 Calendario de Adviento 2025 🎄</h1>
+            <p>24 días de amor y sorpresas especiales para ti</p>
+        </div>
+        <div class="calendar-grid" id="calendarGrid"></div>
+    </div>
+
+    <!-- Modal del Cupón -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <div class="coupon">
+                <div class="coupon-header">
+                    <span class="holly-decoration holly-left">🎄</span>
+                    <h2 id="couponHeader">Cupón 01 • Adviento 2025</h2>
+                    <span class="holly-decoration holly-right">🎄</span>
+                </div>
+                <div class="coupon-body">
+                    <div class="coupon-title" id="couponTitle">Título del Cupón</div>
+                    <div class="coupon-description" id="couponDescription">Descripción del cupón</div>
+                </div>
+                <div class="coupon-footer">
+                    <div class="coupon-dot"></div>
+                    <div class="coupon-dot"></div>
+                    <div class="coupon-dot"></div>
+                    <div class="coupon-dot"></div>
+                    <div class="coupon-dot"></div>
+                    <div class="coupon-dot"></div>
+                    <div class="coupon-dot"></div>
+                    <div class="coupon-dot"></div>
+                    <div class="coupon-dot"></div>
+                    <div class="coupon-dot"></div>
+                    <div class="coupon-dot"></div>
+                    <div class="coupon-dot"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // CONFIGURACIÓN - CAMBIA ESTAS FECHAS Y CUPONES
+        // ============================================
+        
+        // Fecha de inicio del calendario (formato: YYYY-MM-DD)
+        const FECHA_INICIO = '2025-11-10'; // 1 de diciembre de 2025
+        
+        // Cupones para cada día (personaliza cada uno)
+       const cupones = [
+  { titulo: "Chocolate caliente", descripcion: "Llega chocolate caliente en la tarde." },
+  { titulo: "Postre favorito", descripcion: "Llega un postre rico en la noche." },
+  { titulo: "Práctica de inglés", descripcion: "Se inicia el mismo día del canje por llamada; sin horario ni duración predefinidos." },
+  { titulo: "Episodio compartido (1 cap)", descripcion: "Capítulo definido y se intercambian tres notas de voz de comentario." },
+  { titulo: "Mini playlist (6 canciones)", descripcion: "Se crea la playlist, se cargan los tres primeros temas y se comparte enlace." },
+  { titulo: "Juego virtual", descripcion: "Se coordina una sesión breve para jugar en línea." },
+  { titulo: "Ruta viajera (3×3)", descripcion: "Se comparten 3 destinos soñados (foto/link + 1 razón) y se guarda lista compartida." },
+  { titulo: "Conóceme sin filtros (3 pruebas)", descripcion: "Se envían: 1 foto “vergonzosa”, 1 del pasado (con breve historia) y 1 objeto con historia (nota corta)." },
+  { titulo: "Tarjeta escrita a mano", descripcion: "Llega una tarjeta escrita a mano con nota breve." },
+  { titulo: "Helado exprés (15–20 min)", descripcion: "Punto y hora definidos para saludo breve con helado." },
+  { titulo: "Caminata tranqui (sin alcohol)", descripcion: "Ruta corta y horario marcados; charla ligera." },
+  { titulo: "Desayuno sorpresa", descripcion: "Se programa desayuno a domicilio para la mañana." },
+  { titulo: "Meme del día (pack 5)", descripcion: "Paquete de cinco memes personalizados en la noche." },
+  { titulo: "Carta de gratitud", descripcion: "Carta breve y linda en PDF dentro de 24 horas." },
+  { titulo: "Snack sorpresa", descripcion: "Mix sorpresa enviado en la tarde." },
+  { titulo: "Check-in de 10 minutos", descripcion: "Check-in breve por llamada o presencial." },
+  { titulo: "Canción de la mañana", descripcion: "Canción compartida a primera hora con nota breve." },
+  { titulo: "Pausa activa (audio 5 min)", descripcion: "Audio guiado para respirar, soltar y seguir antes del mediodía." },
+  { titulo: "Escena bonita (serie/minuto)", descripcion: "Capítulo y minuto exacto; se ve juntos por videollamada o en persona." },
+  { titulo: "Foto-recuerdo + caption", descripcion: "Foto con pie de foto tierno (sin abrumar)." },
+  { titulo: "Comodín sorpresa", descripcion: "Se concreta una sorpresa especial en las siguientes 24 horas." },
+  { titulo: "Antojo sorpresa", descripcion: "Antojo dulce o salado enviado en la noche." },
+  { titulo: "Plan sin alcohol", descripcion: "Plan puntual propuesto (chocolate caliente + caminata breve)." },
+  { titulo: "Comodín sorpresa", descripcion: "Se concreta una sorpresa especial en las siguientes 24 horas." },
+];
+  // ============================================
+        // CÓDIGO DEL CALENDARIO - NO MODIFICAR
+        // ============================================
+
+        // Crear efecto de nieve
+        function createSnowflakes() {
+            const snowflakeCount = 50;
+            for (let i = 0; i < snowflakeCount; i++) {
+                setTimeout(() => {
+                    const snowflake = document.createElement('div');
+                    snowflake.classList.add('snowflake');
+                    snowflake.innerHTML = '❄';
+                    snowflake.style.left = Math.random() * 100 + 'vw';
+                    snowflake.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                    snowflake.style.opacity = Math.random();
+                    snowflake.style.fontSize = (Math.random() * 10 + 10) + 'px';
+                    document.body.appendChild(snowflake);
+                    
+                    setTimeout(() => {
+                        snowflake.remove();
+                    }, 5000);
+                }, i * 100);
+            }
+        }
+
+        setInterval(createSnowflakes, 5000);
+        createSnowflakes();
+
+        // Obtener fechas
+        const fechaInicio = new Date(FECHA_INICIO);
+        const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0);
+
+        // Función para actualizar el contador regresivo
+        function updateCountdown() {
+            const ahora = new Date();
+            const diferencia = fechaInicio - ahora;
+
+            if (diferencia <= 0) {
+                document.getElementById('landingPage').style.display = 'none';
+                document.getElementById('calendarContainer').style.display = 'block';
+                return;
+            }
+
+            const dias = Math.floor(diferencia / (1000 * 60 * 60 * 24));
+            const horas = Math.floor((diferencia % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutos = Math.floor((diferencia % (1000 * 60 * 60)) / (1000 * 60));
+            const segundos = Math.floor((diferencia % (1000 * 60)) / 1000);
+
+            document.getElementById('countdown').innerHTML = 
+                `${dias}d ${horas}h ${minutos}m ${segundos}s`;
+        }
+
+        // Comprobar si el calendario debe mostrarse
+        if (hoy >= fechaInicio) {
+            document.getElementById('landingPage').style.display = 'none';
+            document.getElementById('calendarContainer').style.display = 'block';
+        } else {
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+        }
+
+        // Crear el calendario
+        const calendarGrid = document.getElementById('calendarGrid');
+        
+        for (let i = 1; i <= 24; i++) {
+            const dia = document.createElement('div');
+            dia.classList.add('calendar-day');
+            
+            const fechaDia = new Date(fechaInicio);
+            fechaDia.setDate(fechaInicio.getDate() + (i - 1));
+            
+            const estaAbierto = localStorage.getItem(`dia_${i}`) === 'abierto';
+            const puedeAbrir = hoy >= fechaDia;
+
+            if (estaAbierto) {
+                dia.classList.add('opened');
+            } else if (!puedeAbrir) {
+                dia.classList.add('locked');
+            }
+
+            dia.innerHTML = `
+                <div class="day-number">${i}</div>
+                <div class="day-label">${puedeAbrir ? (estaAbierto ? '✨ Abierto' : '🎁 Disponible') : '🔒 Bloqueado'}</div>
+                ${!puedeAbrir ? '<div class="lock-icon">🔒</div>' : ''}
+            `;
+
+            dia.onclick = () => openDay(i, puedeAbrir, estaAbierto);
+            calendarGrid.appendChild(dia);
+        }
+
+        // Abrir día
+        function openDay(dia, puedeAbrir, estaAbierto) {
+            if (!puedeAbrir) {
+                alert('¡Este cupón aún no está disponible! 🎁\nEspera hasta su fecha para abrirlo.');
+                return;
+            }
+
+            const cupon = cupones[dia - 1];
+            document.getElementById('couponHeader').textContent = `Cupón ${dia.toString().padStart(2, '0')} • Adviento 2025`;
+            document.getElementById('couponTitle').textContent = cupon.titulo;
+            document.getElementById('couponDescription').textContent = cupon.descripcion;
+            
+            document.getElementById('modal').style.display = 'flex';
+            
+            if (!estaAbierto) {
+                localStorage.setItem(`dia_${dia}`, 'abierto');
+                const diaElement = calendarGrid.children[dia - 1];
+                diaElement.classList.add('opened');
+                diaElement.querySelector('.day-label').textContent = '✨ Abierto';
+            }
+        }
+
+        // Cerrar modal
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
+
+        // Cerrar modal al hacer clic fuera
+        window.onclick = function(event) {
+            const modal = document.getElementById('modal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>
